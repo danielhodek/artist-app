@@ -6,6 +6,7 @@ const artistForm = document.getElementById('artist-form');
 const artistList = document.querySelector('.artist-list');
 
 let artists;
+let numMatches = 0;
 
 document.addEventListener('DOMContentLoaded', async () => {
   artists = await getArtists();
@@ -25,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 searchBtn.addEventListener('click', () => {
   const searchStr = search.value;
   const regex = new RegExp(searchStr, 'i');
-  let numMatches = 0;
+  numMatches = 0;
 
   for (let i = 0; i < artists.length; i++) {
     if (!regex.test(artists[i].name)) {
@@ -136,7 +137,8 @@ function createArtistCard(name, about, imgUrl) {
   // add event listeners
   button.addEventListener('click', () => {
     deleteArtist(indexOf(li));
-    if (artists.length === 0) artistList.classList.add('hide');
+    numMatches--;
+    if (artists.length === 0 || numMatches === 0) artistList.classList.add('hide');
     li.remove();
   });
 
