@@ -23,4 +23,4 @@ app.post('/artists', (req, res) => {
   });
 }); 
 
-app.listen(process.env.PORT || 3000, () => console.log('server readt'));
+app.listen(process.env.PORT || 3000, () => console.log('server ready'));
