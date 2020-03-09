@@ -5,47 +5,40 @@ const addBtn = document.getElementById('add-btn');
 const artistForm = document.getElementById('artist-form');
 const artistList = document.querySelector('.artist-list');
 
-let artists;
-let numMatches = 0;
+const ARTISTS_URL = '/artists';
 
+// Event listeners.
 document.addEventListener('DOMContentLoaded', async () => {
-  artists = await getArtists();
+  try {
+    let artists = await getArtists();
 
-  if (!artists) {
+    if (artists.length === 0) artistList.classList.add('hide');
+    else displayArtists(artists);
+  } catch (err) {
+    console.log(err);
     artists = [];
-    return;
-  }
-
-  if (artists.length === 0) artistList.classList.add('hide');
-
-  for (let a of artists) {
-    addArtistCard(a);
   }
 });
 
-searchBtn.addEventListener('click', () => {
+searchBtn.addEventListener('click', async () => {
+  // Handle on server.
   const searchStr = search.value;
-  const regex = new RegExp(searchStr, 'i');
-  numMatches = 0;
 
-  for (let i = 0; i < artists.length; i++) {
-    if (!regex.test(artists[i].name)) {
-      artistList.children[i].classList.add('hide');
-    } else {
-      artistList.children[i].classList.remove('hide');
-      numMatches++;
-    }
+  try {
+    let artists = await getArtists(searchStr);
+    displayArtists(artists);
+    if (artists.length === 0) artistList.classList.add('hide');
+    else artistList.classList.remove('hide');
+  } catch (err) {
+    console.log(err);
   }
-
-  if (numMatches === 0) artistList.classList.add('hide');
-  else artistList.classList.remove('hide');
 });
 
 addArtistBtn.addEventListener('click', () => {
   toggleForm(artistForm);
 });
 
-addBtn.addEventListener('click', e => {
+addBtn.addEventListener('click', async e => {
   e.preventDefault();
 
   const artist = {
@@ -54,75 +47,78 @@ addBtn.addEventListener('click', e => {
     imgUrl: document.getElementById('img-url').value
   };
 
-  addArtist(artist);
-  addArtistCard(artist);
-  artistList.classList.remove('hide');
-  toggleForm(artistForm);
+  try {
+    await addArtist(artist);
+    addArtistCard(artist);
+    artistList.classList.remove('hide');
+    toggleForm(artistForm);
+  } catch (err) {
+    console.log(err);
+  }
 });
 
-function toggleForm(form) {
-  clearForm(form);
-  artistForm.classList.toggle('hide');
+// CRUD methods.
+async function getArtists(searchStr) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let url = ARTISTS_URL;
+      if (searchStr !== undefined)
+        url += `/${searchStr}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw response;
+      let data = await response.json();
+      resolve(data);
+    } catch (err) {
+      reject(err);
+    }
+  });
 }
 
-function clearForm(form) {
-  const formInputs = form.getElementsByTagName('input');
-  for (let i of formInputs) {
-    i.value = '';
-  }
+async function addArtist(artist) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(ARTISTS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(artist)
+      });
+      if (!response.ok) throw response;
+      resolve(response);
+    } catch (err) {
+      reject(err);
+    }
+  });
 }
 
-function addArtist(artist) {
-  artists.push(artist);
-  saveArtists();
+async function deleteArtist(index) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await fetch(ARTISTS_URL, {
+        method: 'DELETE',
+        header: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(index)
+      });
+      if (!response.ok) throw response;
+      resolve(response);
+    } catch (err) {
+      reject(err);
+    }
+  });
 }
 
-function deleteArtist(index) {
-  artists.splice(index, 1);
-  saveArtists();
-}
-
-async function getArtists() {
-  try {
-    let response = await fetch('/artists', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-    let data = await response.json();
-    return data;
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-async function saveArtists() {
-  try {
-    let response = await fetch('/artists', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(artists)
-    });
-    console.log(response);
-  } catch (err) {
-    console.log(err);
-  }
-}
-
+// DOM functions.
 function addArtistCard(artist) {
   const card = createArtistCard(artist.name, artist.about, artist.imgUrl);
   artistList.appendChild(card);
-}
-
-function indexOf(element) {
-  let i = 0;
-  while ((element = element.previousElementSibling) != null) {
-    i++;
-  }
-  return i;
 }
 
 function createArtistCard(name, about, imgUrl) {
@@ -135,11 +131,15 @@ function createArtistCard(name, about, imgUrl) {
   const button = document.createElement('button');
 
   // add event listeners
-  button.addEventListener('click', () => {
-    deleteArtist(indexOf(li));
-    numMatches--;
-    if (artists.length === 0 || numMatches === 0) artistList.classList.add('hide');
-    li.remove();
+  button.addEventListener('click', async () => {
+    try {
+      await deleteArtist(indexOf(li));
+      li.remove();
+      if (artistList.getElementsByTagName('li').length < 1) 
+        artistList.classList.add('hide');
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   // add classes
@@ -166,4 +166,39 @@ function createArtistCard(name, about, imgUrl) {
   div.appendChild(p);
 
   return li;
+}
+
+// Helper functions.
+function displayArtists(artists) {
+  clearList(artistList);
+  if (artists.length < 1) {
+    artistList.classList.add('hide');
+  } else {
+    artistList.classList.remove('hide');
+    for (let a of artists) addArtistCard(a);
+  }
+}
+
+function toggleForm(form) {
+  clearForm(form);
+  artistForm.classList.toggle('hide');
+}
+
+function clearForm(form) {
+  const formInputs = form.getElementsByTagName('input');
+  for (let i of formInputs) {
+    i.value = '';
+  }
+}
+
+function clearList(list) {
+  while (list.firstChild) list.removeChild(list.firstChild);
+}
+
+function indexOf(element) {
+  let i = 0;
+  while ((element = element.previousElementSibling) != null) {
+    i++;
+  }
+  return i;
 }
