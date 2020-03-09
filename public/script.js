@@ -27,8 +27,6 @@ searchBtn.addEventListener('click', async () => {
   try {
     let artists = await getArtists(searchStr);
     displayArtists(artists);
-    if (artists.length === 0) artistList.classList.add('hide');
-    else artistList.classList.remove('hide');
   } catch (err) {
     console.log(err);
   }
@@ -97,15 +95,14 @@ async function addArtist(artist) {
   });
 }
 
-async function deleteArtist(index) {
+async function deleteArtist(name) {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch(ARTISTS_URL, {
+      const response = await fetch(`${ARTISTS_URL}/${name}`, {
         method: 'DELETE',
-        header: {
+        headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(index)
+        }
       });
       if (!response.ok) throw response;
       resolve(response);
@@ -133,7 +130,7 @@ function createArtistCard(name, about, imgUrl) {
   // add event listeners
   button.addEventListener('click', async () => {
     try {
-      await deleteArtist(indexOf(li));
+      await deleteArtist(name);
       li.remove();
       if (artistList.getElementsByTagName('li').length < 1) 
         artistList.classList.add('hide');
@@ -193,12 +190,4 @@ function clearForm(form) {
 
 function clearList(list) {
   while (list.firstChild) list.removeChild(list.firstChild);
-}
-
-function indexOf(element) {
-  let i = 0;
-  while ((element = element.previousElementSibling) != null) {
-    i++;
-  }
-  return i;
 }

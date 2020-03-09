@@ -40,16 +40,22 @@ app.post('/artists', (req, res) => {
   });
 });
 
-app.delete('/artists', (req, res) => {
-  const index = req.body;
+app.delete('/artists/:name', (req, res) => {
+  const name = req.params.name;
+  console.log(name);
   fs.readFile(ARITSTS_FILE, (err, data) => {
     if (err) return res.sendStatus(500);
     let artists = JSON.parse(data);
-    artists.splice(index, 1);
-    fs.writeFile(ARITSTS_FILE, JSON.stringify(artists), 'utf-8', err => {
-      if (err) return res.sendStatus(500);
-      return res.sendStatus(200);
-    });
+    let filteredArtists = artists.filter(a => a.name !== name);
+    fs.writeFile(
+      ARITSTS_FILE,
+      JSON.stringify(filteredArtists),
+      'utf-8',
+      err => {
+        if (err) return res.sendStatus(500);
+        return res.sendStatus(200);
+      }
+    );
   });
 });
 
