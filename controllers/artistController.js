@@ -6,20 +6,36 @@ exports.add = async (req, res, next) => {
     about: req.body.about,
     url: req.body.url
   };
+  console.log(artist);
 
-  Artist.add(artist);
+  await Artist.add(artist);
+  return res.redirect(301, '/artists');
 }
 
-exports.getAll = async (req, res, next) => {
-  let data = await Artist.getAll();
-  res.render('artist', { artists: data.rows });
+exports.get = async (req, res, next) => {
+  let data;
+  if (req.query.filter) 
+    data = await Artist.getWithFilter(req.query.filter);
+  else
+    data = await Artist.get();
+  return res.render('artist', { artists: data.rows });
+}
+
+exports.getWithFilter = async (req, res, next) => {
+  let data = await Artists.getWithFilter(req.query.filter);
+  return res.render('artists', { artists: data.rows });
 }
 
 exports.getById = async (req, res, next) => {
   let data = await Artist.getById(req.params.id);
-  res.render('artists', { artists: data.rows[0] }); 
+  return res.render('artist', { artists: data.rows[0] }); 
 }
 
 exports.logout = (req, res, next) => {
+  return res.redirect(301, '/artists');
+}
+
+exports.delete = async (req, res, next) => {
+  await Artist.delete(req.params.id);
   return res.redirect(301, '/artists');
 }

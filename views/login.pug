@@ -1,0 +1,26 @@
+doctype html
+html
+  head
+    title Login
+    link(href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet")
+    link(href="/css/styles.css" type="text/css" rel="stylesheet")
+    link(href="/css/login.css" type="text/css" rel="stylesheet")
+  body
+    main
+      form#login-form(href="/login" method="post")
+        h3.form-title Member Login
+        hr
+        div.form-group
+          div.icon-input
+            i.fas.fa-user
+            input(name="username" type="text" placeholder="username" required)
+          div.icon-input
+            i.fas.fa-lock
+            input(name="password" type="password" placeholder="password" required)
+        if msg
+          p.error= msg
+        else
+          p.spacer
+        button.btn.login(type="submit") Login
+    script(src="https://kit.fontawesome.com/2aef0711f9.js" crossorigin="anonymous")
+    

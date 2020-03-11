@@ -4,7 +4,7 @@ const artistController = require('../controllers/artistController');
 
 router.get('/artists', artistController.get);
 router.get('/artists/:id', artistController.getById);
-router.get('/artists/logout', artistController.logout);
 router.post('/artists/add', artistController.add);
+router.get('/artists/delete/:id', artistController.delete);
 
 module.exports = router;
