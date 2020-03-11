@@ -1,0 +1,7 @@
+div#search-box.border
+  h1 Artist Directory
+  form#search-form(action="/artists", method="get")
+    div.input-combo
+      input#filter(name="filter" type="text" value=filter)
+      button#search-btn.btn(type="submit") Search
+      button#add-artist-btn.btn(type="button") Add artist

@@ -14,16 +14,18 @@ exports.add = async (req, res, next) => {
 
 exports.get = async (req, res, next) => {
   let data;
-  if (req.query.filter) 
+  if (req.query.filter) {
     data = await Artist.getWithFilter(req.query.filter);
-  else
+    return res.render('artist', { artists: data.rows, filter: req.query.filter });
+  } else {
     data = await Artist.get();
-  return res.render('artist', { artists: data.rows });
+    return res.render('artist', { artists: data.rows, filter: '' });
+  }  
 }
 
 exports.getWithFilter = async (req, res, next) => {
   let data = await Artists.getWithFilter(req.query.filter);
-  return res.render('artists', { artists: data.rows });
+  return res.render('artists', { artists: data.rows, filter: filter });
 }
 
 exports.getById = async (req, res, next) => {
@@ -37,5 +39,8 @@ exports.logout = (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
   await Artist.delete(req.params.id);
-  return res.redirect(301, '/artists');
+  if (req.query.fiter)
+    return res.redirect(301, '/artists');
+  else
+    return res.redirect(301, '/artists?filter=' + req.query.filter);
 }

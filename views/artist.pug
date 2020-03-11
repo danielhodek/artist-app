@@ -10,21 +10,6 @@ html
       div
         a.btn(href="/login") Logout
     main
-      div#search-box.border
-        h1 Artist Directory
-        form#search-form(action="/artists", method="get")
-          div.input-combo
-            input#filter(name="filter" type="text")
-            button#search-btn.btn(type="submit") Search
-            button#add-artist-btn.btn(type="button") Add artist
-      div#results
-        form#artist-form.hide(action="/artists/add" method="post")
-          input(name="name" type="text" maxLenght="40" placeholder="Name" required)
-          input(name="about" type="text" maxLenght="40" placeholder="About" required)
-          input(name="url" type="text" placeholder="Image URL" required)
-          button#add-btn.btn(type="submit") Add
-        if artists.length > 0
-          ul.artist-list
-            each a in artists
-              include partials/artist-card.pug
+      include partials/search-box.pug
+      include partials/results.pug
     script(type="text/javascript" src="/js/script.js")
