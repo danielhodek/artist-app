@@ -3,8 +3,5 @@ li.artist-card
   div.artist-text
     h3.artist-name= a.name
     p.artist-description= a.about
-  if filter
-    a.btn.delete(href="/artists/delete/"+a.id+"?filter="+filter) Delete
-  else
-    a.btn.delete(href="/artists/delete/"+a.id) Delete
+  a.btn.delete(href="/artists/delete/"+a.id) Delete
   
